@@ -66,10 +66,29 @@ class App extends React.Component {
 	    cbf = rica+lica+posterior
 	    }
 	    break;
+	case "4":
+	    if ( !( (isNaN(rica) && !isNaN(lica))||(!isNaN(rica)&&isNaN(lica)) )  ) {
+			alert('clear either RVA or LVA');
+	    }
+	    else {
+		var posterior = rva + lva;
+		var anterior = 0;
+		if (isNaN(lica)) {
+		    const t_lica = 0.3158 * posterior + 0.748 * rica
+		    anterior = t_lica + rica
+		}
+		if (isNaN(rica)) {
+		    const t_rica = 0.3218 * posterior + 0.722 * lica
+		    anterior = lica + t_rica
+		}
+		cbf = anterior + posterior;
+	    }
+	    break;
 	default:
 	    alert('model ' + this.state.model + ' not implemented');
 	}
 
+	
 	
 	
 	this.setState({cbf: cbf})
@@ -83,10 +102,10 @@ class App extends React.Component {
       <h1>CBF Imputation</h1>
 	<form>
 	    <label>        Model:        <select    name="model"   value={this.state.model} onChange={e => this.setState({[e.target.name]: e.target.value})}  >
-					     <option value="1">Model 1</option>
-					     <option value="2">Model 2</option>
-					     <option value="3">Model 3</option>
-					     <option value="4">Model 4</option>
+					     <option value="1">1 - Sum 4 Vessels</option>
+					     <option value="2">2 - Impute 1 corrupted vertebral artery</option>
+					     <option value="3">3 - Discard vertebral, impute posterior</option>
+					     <option value="4">4 - Impute 1 corrupted internal carotid</option>
 					     <option value="5">Model 5</option>
 					     <option value="6">Model 6</option>
 					     <option value="7">Model 7</option>
