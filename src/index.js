@@ -42,7 +42,6 @@ function model5ICAFlow(rica,lica){
 	const t_lica = 0.89 * rica + 36.60;
 	lica = t_lica
 	
-	
     }
     if ( isNaN(rica)) {
 	const t_rica = 0.82 * lica + 55.42;
@@ -55,10 +54,30 @@ function model5ICAFlow(rica,lica){
 	rica,
 	lica,
 	anterior
+    }    
+}
+function model8VAFlow(rva, lva){
+    const kva = isNaN(rva) ? lva : rva;
+    console.log('kva = ' + kva)
+    const iva = 86.95 + 0.43 * kva;
+    console.log(iva)
+    
+    if (isNaN(rva)) {
+	rva = iva
+    }
+    if (isNaN(lva)) {
+	lva = iva
+    }
+
+    const posterior = rva + lva
+    
+    return {
+	rva,
+	lva,
+	posterior
     }
     
 }
-
 class App extends React.Component {
     constructor(props) {
 	super(props);
@@ -147,13 +166,41 @@ class App extends React.Component {
 	     if ( !( (isNaN(rica) && !isNaN(lica))||(!isNaN(rica)&&isNaN(lica)) )  ) {
 		alert('clear either RICA or LICA');
 	    } else if ( !isNaN(rva) && !isNaN(lva)  ) {
-		alert('clear either both RVA and LVA');
+		alert('clear  both RVA and LVA');
 	    } else {
 		var calcICA = model5ICAFlow(rica, lica)
 		var calcPosterior = model3PosteriorFlow(calcICA.rica,calcICA.lica);
 		    
 		cbf = calcICA.anterior+calcPosterior;
 		
+	    }
+	    break;
+
+	case "7":
+	    if ( !isNaN(rica) && !isNaN(lica)) {
+		alert("clear both RICA and LICA")
+	    } else {
+		const posterior = rva + lva;
+		const anterior = 233.81 + 1.49*posterior;
+		cbf = anterior + posterior;
+	    }
+	    break;
+	case "8":
+	    if ( !isNaN(rica) && !isNaN(lica)) {
+		alert("clear both RICA and LICA")
+	    } else if ( !( (isNaN(rva) && !isNaN(lva))||(!isNaN(rva)&&isNaN(lva)) )  ) {
+		alert('clear either RVA or LVA');
+	    } else {
+		const calcVA = model8VAFlow(rva,lva)
+		const anterior = 233.81 + 1.49 * calcVA.posterior;
+		cbf = anterior + calcVA.posterior;
+	    }
+	    break;
+	case "9":
+	    if ( !isNaN(rica) && !isNaN(lica) && !isNaN(rva) && !isNaN(lva)) {
+		alert("clear ALL vessel flow values")
+	    } else {
+		cbf=-1
 	    }
 	    break;
 	default:
@@ -180,9 +227,9 @@ class App extends React.Component {
 					     <option value="4">4 - Impute 1 corrupted internal carotid</option>
 					     <option value="5">5 - Impute 1 corruted ICA, 1 corrupted VA</option>
 					     <option value="6">6 - Impute 1 corrupted ICA, then impute posterior flow</option>
-					     <option value="7">Model 7</option>
-					     <option value="8">Model 8</option>
-					     <option value="9">Model 9</option>
+					     <option value="7">7 - Impute anterior from posterior</option>
+					     <option value="8">8 - Impute 1 corrupted VA, then impute anterior flow</option>
+					     <option value="9">9 - All corrupted vessels - population mean flow</option>
 					 </select>
 	    </label>
 	    <br/>
