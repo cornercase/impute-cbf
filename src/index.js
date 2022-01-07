@@ -269,10 +269,6 @@ class App extends React.Component {
 
 	<h5>Total CBF: {this.state.cbf}</h5>
 	<div>
-	    Sandbox
-	<h5>RICA: {this.state.rica}</h5>
-	    <h5>LICA: {this.state.lica}</h5>
-	    </div>
     </div>
     );
     }

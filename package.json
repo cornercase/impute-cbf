@@ -2,7 +2,7 @@
   "name": "impute-cbf",
   "version": "0.1.0",
     "private": true,
-    "homepage": "https://cornercase.github.io/impute-cbf/",
+    "homepage": "https://cornercase.github.io/impute-cbf",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
