@@ -15,10 +15,10 @@ class App extends React.Component {
     constructor(props) {
 	super(props);
 	this.state = {
-	    rica: null,
-	    lica: null,
-	    rva: null,
-	    lva: null,
+	    rica: '',
+	    lica: '',
+	    rva: '',
+	    lva: '',
 	    cbf: 0,
 	    model: "1",
 	       
@@ -55,7 +55,16 @@ class App extends React.Component {
 		console.log(iva)
 		cbf = rica+lica+kva+iva;
 	    }
-	    
+	    break;
+	case "3":
+	    if (!isNaN(rva) && !isNaN(lva)) {
+		alert("Both RVA and LVA must be empty for model 3")
+		
+	    } else {
+	    const posterior = 29.80+0.38*( rica + lica)
+	    console.log('posterior = ' + posterior)
+	    cbf = rica+lica+posterior
+	    }
 	    break;
 	default:
 	    alert('model ' + this.state.model + ' not implemented');
