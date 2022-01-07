@@ -10,14 +10,54 @@ function handleChange(e) {
     this.setState({[e.target.name]: e.target.value})
 }
 
-function model2posteriorFlow(rica, lica, rva, lva){
+function model2VAFlow(rica, lica, rva, lva){
     const kva = isNaN(rva) ? lva : rva;
     console.log('kva = ' + kva)
     const iva = 0.436 * (rica + lica) - kva;
     console.log(iva)
-    return kva+iva
+    
+    if (isNaN(rva)) {
+	rva = iva
+    }
+    if (isNaN(lva)) {
+	lva = iva
+    }
+
+    const posterior = rva + lva
+    
+    return {
+	rva,
+	lva,
+	posterior
+    }
+    
+}
+function model3PosteriorFlow(rica, lica){
+    const posterior = 29.80+0.38*( rica + lica)
+    return posterior    
 }
 
+function model5ICAFlow(rica,lica){
+    if (isNaN(lica)) {
+	const t_lica = 0.89 * rica + 36.60;
+	lica = t_lica
+	
+	
+    }
+    if ( isNaN(rica)) {
+	const t_rica = 0.82 * lica + 55.42;
+	rica = t_rica
+	
+    }
+    const anterior = rica + lica;
+
+    return{
+	rica,
+	lica,
+	anterior
+    }
+    
+}
 
 class App extends React.Component {
     constructor(props) {
@@ -56,8 +96,8 @@ class App extends React.Component {
 		alert('clear either RVA or LVA');
 	    }
 	    else {
-		const posterior = model2posteriorFlow(rica, lica, rva,lva)
-		cbf = rica+lica+posterior;
+		let compVA = model2VAFlow(rica, lica, rva,lva)
+		cbf = rica+lica+compVA.posterior;
 	    }
 	    break;
 	case "3":
@@ -65,7 +105,7 @@ class App extends React.Component {
 		alert("Both RVA and LVA must be empty for model 3")
 		
 	    } else {
-	    const posterior = 29.80+0.38*( rica + lica)
+		const posterior = model3PosteriorFlow( rica, lica)
 	    console.log('posterior = ' + posterior)
 	    cbf = rica+lica+posterior
 	    }
@@ -95,20 +135,24 @@ class App extends React.Component {
 	    } else if ( !( (isNaN(rva) && !isNaN(lva))||(!isNaN(rva)&&isNaN(lva)) )  ) {
 		alert('clear either RVA or LVA');
 	    } else {
-		var anterior = 0;
-		var posterior = 0;
-		if (isNaN(lica)) {
-		    const t_lica = 0.89 * rica + 36.60;
-		    anterior = t_lica + rica;
-		    posterior = model2posteriorFlow(rica,t_lica,rva,lva);
+		
+		var calcICA = model5ICAFlow(rica, lica)
+		var calcVA = model2VAFlow(calcICA.rica,calcICA.lica,rva,lva);
 		    
-		}
-		if ( isNaN(rica)) {
-		    const t_rica = 0.82 * lica + 55.42;
-		    anterior = lica + t_rica;
-		    posterior = model2posteriorFlow(t_rica,lica,rva,lva);
-		}
-		cbf = anterior+posterior;
+		cbf = calcICA.anterior+calcVA.posterior;
+		
+	    }
+	    break;
+	case "6":
+	     if ( !( (isNaN(rica) && !isNaN(lica))||(!isNaN(rica)&&isNaN(lica)) )  ) {
+		alert('clear either RICA or LICA');
+	    } else if ( !isNaN(rva) && !isNaN(lva)  ) {
+		alert('clear either both RVA and LVA');
+	    } else {
+		var calcICA = model5ICAFlow(rica, lica)
+		var calcPosterior = model3PosteriorFlow(calcICA.rica,calcICA.lica);
+		    
+		cbf = calcICA.anterior+calcPosterior;
 		
 	    }
 	    break;
@@ -135,7 +179,7 @@ class App extends React.Component {
 					     <option value="3">3 - Discard vertebral, impute posterior</option>
 					     <option value="4">4 - Impute 1 corrupted internal carotid</option>
 					     <option value="5">5 - Impute 1 corruted ICA, 1 corrupted VA</option>
-					     <option value="6">Model 6</option>
+					     <option value="6">6 - Impute 1 corrupted ICA, then impute posterior flow</option>
 					     <option value="7">Model 7</option>
 					     <option value="8">Model 8</option>
 					     <option value="9">Model 9</option>
