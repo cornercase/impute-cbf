@@ -10,6 +10,14 @@ function handleChange(e) {
     this.setState({[e.target.name]: e.target.value})
 }
 
+function model2posteriorFlow(rica, lica, rva, lva){
+    const kva = isNaN(rva) ? lva : rva;
+    console.log('kva = ' + kva)
+    const iva = 0.436 * (rica + lica) - kva;
+    console.log(iva)
+    return kva+iva
+}
+
 
 class App extends React.Component {
     constructor(props) {
@@ -48,12 +56,8 @@ class App extends React.Component {
 		alert('clear either RVA or LVA');
 	    }
 	    else {
-		
-		const kva = isNaN(rva) ? lva : rva;
-		console.log('kva = ' + kva)
-		const iva = 0.436 * (rica + lica) - kva;
-		console.log(iva)
-		cbf = rica+lica+kva+iva;
+		const posterior = model2posteriorFlow(rica, lica, rva,lva)
+		cbf = rica+lica+posterior;
 	    }
 	    break;
 	case "3":
@@ -68,7 +72,7 @@ class App extends React.Component {
 	    break;
 	case "4":
 	    if ( !( (isNaN(rica) && !isNaN(lica))||(!isNaN(rica)&&isNaN(lica)) )  ) {
-			alert('clear either RVA or LVA');
+			alert('clear either RICA or LICA');
 	    }
 	    else {
 		var posterior = rva + lva;
@@ -82,6 +86,30 @@ class App extends React.Component {
 		    anterior = lica + t_rica
 		}
 		cbf = anterior + posterior;
+	    }
+	    break;
+
+	case "5":
+	    if ( !( (isNaN(rica) && !isNaN(lica))||(!isNaN(rica)&&isNaN(lica)) )  ) {
+		alert('clear either RICA or LICA');
+	    } else if ( !( (isNaN(rva) && !isNaN(lva))||(!isNaN(rva)&&isNaN(lva)) )  ) {
+		alert('clear either RVA or LVA');
+	    } else {
+		var anterior = 0;
+		var posterior = 0;
+		if (isNaN(lica)) {
+		    const t_lica = 0.89 * rica + 36.60;
+		    anterior = t_lica + rica;
+		    posterior = model2posteriorFlow(rica,t_lica,rva,lva);
+		    
+		}
+		if ( isNaN(rica)) {
+		    const t_rica = 0.82 * lica + 55.42;
+		    anterior = lica + t_rica;
+		    posterior = model2posteriorFlow(t_rica,lica,rva,lva);
+		}
+		cbf = anterior+posterior;
+		
 	    }
 	    break;
 	default:
@@ -106,7 +134,7 @@ class App extends React.Component {
 					     <option value="2">2 - Impute 1 corrupted vertebral artery</option>
 					     <option value="3">3 - Discard vertebral, impute posterior</option>
 					     <option value="4">4 - Impute 1 corrupted internal carotid</option>
-					     <option value="5">Model 5</option>
+					     <option value="5">5 - Impute 1 corruted ICA, 1 corrupted VA</option>
 					     <option value="6">Model 6</option>
 					     <option value="7">Model 7</option>
 					     <option value="8">Model 8</option>
