@@ -268,7 +268,7 @@ class App extends React.Component {
 	</form>
 
 	<h5>Total CBF: {this.state.cbf}</h5>
-	<div>
+	
     </div>
     );
     }
