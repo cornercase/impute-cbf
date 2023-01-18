@@ -10,6 +10,27 @@ function handleChange(e) {
     this.setState({[e.target.name]: e.target.value})
 }
 
+function model1VAflow(rica, lica, rva, lva){
+    
+    const kva = isNaN(rva) ? lva : rva;
+    console.log('kva = ' + kva)
+    const flow = 1.2259 * (rica + lica) + 0.9334 * kva;
+    console.log(flow)
+    
+    return {
+	flow
+    }
+}
+
+function model2(rica, lica){
+    
+    const flow = 1.4236 * (rica + lica)
+    
+    return {
+	flow
+    }
+    
+}
 function model2VAFlow(rica, lica, rva, lva){
     const kva = isNaN(rva) ? lva : rva;
     console.log('kva = ' + kva)
@@ -102,105 +123,113 @@ class App extends React.Component {
 	const rva = parseFloat(this.state.rva);
 	const lva = parseFloat(this.state.lva);
 	switch (this.state.model) {
-	case "1":
+	case "0":
 	    //alert('Not actually implemented');
 	    cbf = rica+lica+rva+lva;
+	    break;
+	case "1":
+	    if ( !( (isNaN(rva) && !isNaN(lva))||(!isNaN(rva)&&isNaN(lva)) )  ) {
+		alert('clear either RVA or LVA');
+	    } else {
+		let compVA = model1VAflow(rica, lica, rva,lva)
+		cbf = compVA.flow;
+	    }
 	    break;
 	case "2":
 	    //alert('Not actually implemented');
 	    //if (isNaN(rva)) {alert('yes')}
 	    console.log('rva = ' + rva)
 	    console.log('lva = ' + lva)
-	    if ( !( (isNaN(rva) && !isNaN(lva))||(!isNaN(rva)&&isNaN(lva)) )  ) {
-		alert('clear either RVA or LVA');
+	    if (!(isNaN(rva) && isNaN(lva))) {
+		alert("Both RVA and LVA must be empty for model 2")
 	    }
 	    else {
-		let compVA = model2VAFlow(rica, lica, rva,lva)
-		cbf = rica+lica+compVA.posterior;
+		let comp = model2(rica, lica)
+		cbf = comp.flow;
 	    }
 	    break;
-	case "3":
-	    if (!isNaN(rva) && !isNaN(lva)) {
-		alert("Both RVA and LVA must be empty for model 3")
+	// case "3":
+	//     if (!isNaN(rva) && !isNaN(lva)) {
+	// 	alert("Both RVA and LVA must be empty for model 3")
 		
-	    } else {
-		const posterior = model3PosteriorFlow( rica, lica)
-	    console.log('posterior = ' + posterior)
-	    cbf = rica+lica+posterior
-	    }
-	    break;
-	case "4":
+	//     } else {
+	// 	const posterior = model3PosteriorFlow( rica, lica)
+	//     console.log('posterior = ' + posterior)
+	//     cbf = rica+lica+posterior
+	//     }
+	//     break;
+	case "3":
 	    if ( !( (isNaN(rica) && !isNaN(lica))||(!isNaN(rica)&&isNaN(lica)) )  ) {
 			alert('clear either RICA or LICA');
 	    }
 	    else {
 		var posterior = rva + lva;
 		var anterior = 0;
+		var tica = 0;
 		if (isNaN(lica)) {
-		    const t_lica = 0.3158 * posterior + 0.748 * rica
-		    anterior = t_lica + rica
+		    tica = rica;
 		}
 		if (isNaN(rica)) {
-		    const t_rica = 0.3218 * posterior + 0.722 * lica
-		    anterior = lica + t_rica
+		    tica = lica;
 		}
-		cbf = anterior + posterior;
+		cbf = 1.8662*tica + 1.1451 * posterior;
 	    }
 	    break;
 
-	case "5":
+	case "4":
 	    if ( !( (isNaN(rica) && !isNaN(lica))||(!isNaN(rica)&&isNaN(lica)) )  ) {
 		alert('clear either RICA or LICA');
 	    } else if ( !( (isNaN(rva) && !isNaN(lva))||(!isNaN(rva)&&isNaN(lva)) )  ) {
 		alert('clear either RVA or LVA');
 	    } else {
 		
-		var calcICA = model5ICAFlow(rica, lica)
-		var calcVA = model2VAFlow(calcICA.rica,calcICA.lica,rva,lva);
-		    
-		cbf = calcICA.anterior+calcVA.posterior;
+		const kva = isNaN(rva) ? lva : rva;
+		const kica = isNaN(rica) ? lica : rica;
+		
+		cbf = 2.4194 * kica + 0.9825 * kva;
 		
 	    }
 	    break;
-	case "6":
+	case "5":
+	    var kica = 0;
 	     if ( !( (isNaN(rica) && !isNaN(lica))||(!isNaN(rica)&&isNaN(lica)) )  ) {
 		alert('clear either RICA or LICA');
-	    } else if ( !isNaN(rva) && !isNaN(lva)  ) {
-		alert('clear  both RVA and LVA');
-	    } else {
-		var calcICA = model5ICAFlow(rica, lica)
-		var calcPosterior = model3PosteriorFlow(calcICA.rica,calcICA.lica);
+	     } else {
+		 if ( !isNaN(rva) && !isNaN(lva)  ) {
+		     alert('clear  both RVA and LVA');
+		 } else {
+		     kica = isNaN(rica) ? lica : rica;
+		 }
 		    
-		cbf = calcICA.anterior+calcPosterior;
+		cbf = 2.8414 * kica;
 		
 	    }
 	    break;
 
-	case "7":
+	case "6":
 	    if ( !isNaN(rica) && !isNaN(lica)) {
 		alert("clear both RICA and LICA")
 	    } else {
 		const posterior = rva + lva;
-		const anterior = 233.81 + 1.49*posterior;
-		cbf = anterior + posterior;
+		
+		cbf = 3.2193 * posterior;
 	    }
 	    break;
-	case "8":
+	case "7":
 	    if ( !isNaN(rica) && !isNaN(lica)) {
 		alert("clear both RICA and LICA")
 	    } else if ( !( (isNaN(rva) && !isNaN(lva))||(!isNaN(rva)&&isNaN(lva)) )  ) {
 		alert('clear either RVA or LVA');
 	    } else {
-		const calcVA = model8VAFlow(rva,lva)
-		const anterior = 233.81 + 1.49 * calcVA.posterior;
-		cbf = anterior + calcVA.posterior;
+		const kva = isNaN(rva) ? lva : rva;
+		cbf = 5.8164 * kva;
 	    }
 	    break;
-	case "9":
+	case "8":
 	    if ( !isNaN(rica) && !isNaN(lica) && !isNaN(rva) && !isNaN(lva)) {
 		alert("clear ALL vessel flow values")
 	    } else {
-		cbf=-1
+		cbf=933.6563
 	    }
 	    break;
 	default:
@@ -221,15 +250,15 @@ class App extends React.Component {
       <h1>CBF Imputation</h1>
 	<form>
 	    <label>        Model:        <select    name="model"   value={this.state.model} onChange={e => this.setState({[e.target.name]: e.target.value})}  >
-					     <option value="1">1 - Sum 4 Vessels</option>
-					     <option value="2">2 - Impute 1 corrupted vertebral artery</option>
-					     <option value="3">3 - Discard vertebral, impute posterior</option>
-					     <option value="4">4 - Impute 1 corrupted internal carotid</option>
-					     <option value="5">5 - Impute 1 corruted ICA, 1 corrupted VA</option>
-					     <option value="6">6 - Impute 1 corrupted ICA, then impute posterior flow</option>
-					     <option value="7">7 - Impute anterior from posterior</option>
-					     <option value="8">8 - Impute 1 corrupted VA, then impute anterior flow</option>
-					     <option value="9">9 - All corrupted vessels - population mean flow</option>
+					     <option value="0">0 - Sum 4 Vessels</option>
+					     <option value="1">1 - Impute from 2 ICAs and 1 VA</option>
+					     <option value="2">2 - Impute from 2 ICAs</option>
+					     <option value="3">3 - Impute from 1 ICA and 2 VAs</option>
+					     <option value="4">4 - Impute from 1 ICA and 1 VA</option>
+					     <option value="5">5 - Impute from 1 ICA</option>
+					     <option value="6">6 - Impute from 2 VAs</option>
+					     <option value="7">7 - Impute from 1 VA</option>
+					     <option value="8">8 - All corrupted vessels - population mean flow</option>
 					 </select>
 	    </label>
 	    <br/>
